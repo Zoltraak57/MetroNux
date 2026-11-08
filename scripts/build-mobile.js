@@ -51,9 +51,8 @@ function injectShim(file) {
   fs.writeFileSync(file, next, 'utf8');
 }
 
-// nodejs-mobile dibangun tanpa ICU (v8_enable_i18n_support=0), sehingga properti
-// regex seperti \p{Emoji} ditolak V8 saat pencarian. Ganti dengan pemeriksaan
-// rentang kode poin biasa agar tetap jalan di perangkat.
+// nodejs-mobile dibangun tanpa ICU (v8_enable_i18n_support=0), sehingga V8
+// menolak semua properti regex (\p{...}). Ganti dengan rentang kode poin biasa.
 const EMOJI_HELPER = `function isEmojiOnly(text) {
     for (const char of text) {
         const cp = char.codePointAt(0);
@@ -70,7 +69,9 @@ const EMOJI_HELPER = `function isEmojiOnly(text) {
 }
 `;
 
-function patchYoutubei(target) {
+const EMOJI_STRIP_PATTERN = '/[\\u{1F000}-\\u{1FAFF}\\u{2600}-\\u{27BF}\\u{2B00}-\\u{2BFF}\\u{FE0F}\\u{200D}\\u{20E3}]/gu';
+
+function patchTextJs(target) {
   const file = path.join(target, 'dist', 'src', 'parser', 'classes', 'misc', 'Text.js');
   if (!fs.existsSync(file)) throw new Error('Berkas Text.js youtubei.js tidak ditemukan');
   const original = fs.readFileSync(file, 'utf8');
@@ -85,8 +86,47 @@ function patchYoutubei(target) {
     .replace(marker, `${EMOJI_HELPER}${marker}`)
     .replace(pattern, 'isEmojiOnly(text)');
   fs.writeFileSync(file, patched, 'utf8');
-  console.log('[mobile] patch emoji youtubei.js untuk V8 tanpa ICU');
+  console.log('[mobile] patch Text.js youtubei.js untuk V8 tanpa ICU');
 }
+
+function patchCommentView(target) {
+  const file = path.join(target, 'dist', 'src', 'parser', 'classes', 'comments', 'CommentView.js');
+  if (!fs.existsSync(file)) throw new Error('Berkas CommentView.js youtubei.js tidak ditemukan');
+  const original = fs.readFileSync(file, 'utf8');
+  const pattern = ".replace(/[^\\p{L}\\p{N}\\p{P}\\p{Z}]/gu, '')";
+  if (!original.includes(pattern)) {
+    if (/\.replace\(\/\[\\u\{1F000\}/.test(original)) return;
+    throw new Error('Pola komentar youtubei.js berubah, patch dibatalkan');
+  }
+  fs.writeFileSync(file, original.replace(pattern, `.replace(${EMOJI_STRIP_PATTERN}, '')`), 'utf8');
+  console.log('[mobile] patch CommentView.js youtubei.js untuk V8 tanpa ICU');
+}
+
+// Jaring pengaman: jangan pernah mengirim properti regex Unicode ke V8 tanpa ICU.
+function assertNoUnicodeProperties(dir) {
+  const found = [];
+  const walk = (current) => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const target = path.join(current, entry.name);
+      if (entry.isDirectory()) walk(target);
+      else if (/\.(js|mjs|cjs)$/i.test(entry.name)) {
+        if (/\\[pP]\{/.test(fs.readFileSync(target, 'utf8'))) {
+          found.push(path.relative(dir, target));
+        }
+      }
+    }
+  };
+  walk(dir);
+  if (found.length) {
+    throw new Error(`Properti regex Unicode tidak didukung runtime Android: ${found.join(', ')}`);
+  }
+}
+
+function patchYoutubei(target) {
+  patchTextJs(target);
+  patchCommentView(target);
+}
+
 
 function buildUi() {
   const vite = path.join(ROOT, 'node_modules', '.bin', process.platform === 'win32' ? 'vite.cmd' : 'vite');
@@ -137,6 +177,7 @@ async function main() {
     }
     pruneRuntime(target);
   }
+  assertNoUnicodeProperties(modulesDir);
 
   const size = (dir) => {
     let total = 0;
