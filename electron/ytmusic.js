@@ -34,13 +34,25 @@ async function getYtModule() {
   return ytModulePromise;
 }
 
-async function getClient() {
+function deviceTimezone() {
+  try {
+    if (typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    }
+  } catch {
+    // Runtime tanpa ICU (nodejs-mobile di Android) tidak punya Intl.
+  }
+  return 'UTC';
+}
+
+function getClient() {
   if (!clientPromise) {
     clientPromise = (async () => {
       const { Innertube } = await getYtModule();
       return Innertube.create({
         lang: 'id',
         location: 'ID',
+        timezone: deviceTimezone(),
         retrieve_player: true,
       });
     })().catch((err) => {

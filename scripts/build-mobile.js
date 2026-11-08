@@ -102,29 +102,49 @@ function patchCommentView(target) {
   console.log('[mobile] patch CommentView.js youtubei.js untuk V8 tanpa ICU');
 }
 
-// Jaring pengaman: jangan pernah mengirim properti regex Unicode ke V8 tanpa ICU.
-function assertNoUnicodeProperties(dir) {
-  const found = [];
+function patchSessionJs(target) {
+  const file = path.join(target, 'dist', 'src', 'core', 'Session.js');
+  if (!fs.existsSync(file)) throw new Error('Berkas Session.js youtubei.js tidak ditemukan');
+  const original = fs.readFileSync(file, 'utf8');
+  const pattern = 'tz = Intl.DateTimeFormat().resolvedOptions().timeZone';
+  if (!original.includes(pattern)) {
+    if (original.includes("tz = 'UTC'")) return;
+    throw new Error('Pola timezone youtubei.js berubah, patch dibatalkan');
+  }
+  fs.writeFileSync(file, original.replace(pattern, "tz = 'UTC'"), 'utf8');
+  console.log('[mobile] patch Session.js youtubei.js untuk runtime tanpa Intl');
+}
+
+// Jaring pengaman: jangan pernah mengirim properti regex Unicode atau Intl
+// ke V8 tanpa ICU.
+function assertAndroidRuntimeSafe(dir) {
+  const regexProps = [];
+  const intlRefs = [];
   const walk = (current) => {
     for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
       const target = path.join(current, entry.name);
       if (entry.isDirectory()) walk(target);
       else if (/\.(js|mjs|cjs)$/i.test(entry.name)) {
-        if (/\\[pP]\{/.test(fs.readFileSync(target, 'utf8'))) {
-          found.push(path.relative(dir, target));
-        }
+        const text = fs.readFileSync(target, 'utf8');
+        const relative = path.relative(dir, target);
+        if (/\\[pP]\{/.test(text)) regexProps.push(relative);
+        if (/\bIntl\./.test(text)) intlRefs.push(relative);
       }
     }
   };
   walk(dir);
-  if (found.length) {
-    throw new Error(`Properti regex Unicode tidak didukung runtime Android: ${found.join(', ')}`);
+  if (regexProps.length) {
+    throw new Error(`Properti regex Unicode tidak didukung runtime Android: ${regexProps.join(', ')}`);
+  }
+  if (intlRefs.length) {
+    throw new Error(`Referensi Intl tidak didukung runtime Android: ${intlRefs.join(', ')}`);
   }
 }
 
 function patchYoutubei(target) {
   patchTextJs(target);
   patchCommentView(target);
+  patchSessionJs(target);
 }
 
 
@@ -177,7 +197,7 @@ async function main() {
     }
     pruneRuntime(target);
   }
-  assertNoUnicodeProperties(modulesDir);
+  assertAndroidRuntimeSafe(modulesDir);
 
   const size = (dir) => {
     let total = 0;
