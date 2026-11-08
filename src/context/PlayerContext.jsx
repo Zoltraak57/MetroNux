@@ -608,11 +608,15 @@ export function PlayerProvider({ children }) {
     if (!window.mntx) return undefined;
     return api.onMediaCommand((command) => {
       if (command === 'toggle') togglePlay();
-      else if (command === 'next') next(false);
+      else if (command === 'play') {
+        if (!playing) togglePlay();
+      } else if (command === 'pause') {
+        if (playing) togglePlay();
+      } else if (command === 'next') next(false);
       else if (command === 'previous') previous();
       else if (command === 'stop') stop();
     });
-  }, [next, previous, stop, togglePlay]);
+  }, [next, playing, previous, stop, togglePlay]);
 
   const actionsValue = useMemo(
     () => ({

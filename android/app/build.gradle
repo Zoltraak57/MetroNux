@@ -1,0 +1,86 @@
+plugins {
+  id 'com.android.application'
+}
+
+def keystorePropsFile = rootProject.file('keystore.properties')
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+  keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+
+android {
+  namespace 'id.metronux.player'
+  compileSdk 35
+  ndkVersion '26.1.10909125'
+
+  defaultConfig {
+    applicationId 'id.metronux.player'
+    minSdk 24
+    targetSdk 34
+    versionCode 1
+    versionName '1.0.0'
+
+    ndk {
+      abiFilters 'armeabi-v7a', 'arm64-v8a'
+    }
+
+    externalNativeBuild {
+      cmake {
+        cppFlags '-std=c++17'
+        arguments '-DANDROID_STL=c++_shared'
+      }
+    }
+  }
+
+  signingConfigs {
+    release {
+      if (keystorePropsFile.exists()) {
+        storeFile rootProject.file(keystoreProps['storeFile'])
+        storePassword keystoreProps['storePassword']
+        keyAlias keystoreProps['keyAlias']
+        keyPassword keystoreProps['keyPassword']
+      }
+    }
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+      shrinkResources false
+      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+      if (keystorePropsFile.exists()) {
+        signingConfig signingConfigs.release
+      }
+    }
+  }
+
+  externalNativeBuild {
+    cmake {
+      path 'src/main/cpp/CMakeLists.txt'
+      version '3.22.1'
+    }
+  }
+
+  sourceSets {
+    main {
+      jniLibs.srcDirs = ['src/main/jniLibs']
+      assets.srcDirs = ['src/main/assets']
+    }
+  }
+
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
+
+  lint {
+    checkReleaseBuilds false
+    abortOnError false
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+}

@@ -1,6 +1,20 @@
 node_modules/
 dist/
+dist-mobile/
 release/
 .devdata/
 *.log
 .DS_Store
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/local.properties
+android/.cache/
+android/keystore.properties
+android/*.jks
+android/app/src/main/jniLibs/
+android/app/src/main/cpp/include/
+android/app/src/main/assets/nodejs-project/

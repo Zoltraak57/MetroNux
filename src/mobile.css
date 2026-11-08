@@ -1,0 +1,333 @@
+/* Penyesuaian tata letak Android. Hanya aktif saat shim mobile menambahkan kelas .mobile. */
+
+.mobile {
+  height: 100%;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+.mobile .app-shell {
+  height: 100%;
+}
+
+.mobile .sidebar {
+  display: none !important;
+}
+
+.mobile .app-body {
+  display: block;
+  height: 100%;
+}
+
+.mobile .app-main {
+  height: 100%;
+}
+
+.mobile .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  padding: max(10px, env(safe-area-inset-top)) 14px 10px;
+  background: color-mix(in srgb, var(--background) 88%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.mobile .topbar-left {
+  min-width: 0;
+}
+
+.mobile .history-buttons,
+.mobile .topbar-search {
+  display: none;
+}
+
+.mobile .topbar-title {
+  display: inline;
+  font-size: 1rem;
+  font-weight: 680;
+  color: var(--on-surface);
+}
+
+.mobile .content,
+.mobile .hscroll {
+  scrollbar-width: none;
+}
+
+.mobile .content::-webkit-scrollbar,
+.mobile .hscroll::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile .content {
+  padding: 10px 14px calc(150px + env(safe-area-inset-bottom));
+  scroll-behavior: auto;
+}
+
+.mobile .page {
+  padding-bottom: 8px;
+}
+
+.mobile .page-head h1,
+.mobile .home-head h1 {
+  font-size: 1.55rem;
+}
+
+.mobile .hscroll {
+  margin-inline: -14px;
+  padding-inline: 14px;
+}
+
+.mobile .hscroll .media-card {
+  flex-basis: 132px;
+  width: 132px;
+}
+
+.mobile .media-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 12px;
+}
+
+.mobile .song-head,
+.mobile .song-row {
+  grid-template-columns: 30px minmax(0, 1fr) 44px 34px;
+  gap: 8px;
+  padding-inline: 8px;
+}
+
+.mobile .song-head > *:nth-child(3),
+.mobile .song-row .song-album {
+  display: none;
+}
+
+.mobile .song-head > *:nth-child(4),
+.mobile .song-row .song-duration {
+  grid-column: 3;
+}
+
+.mobile .song-row .song-actions,
+.mobile .song-head > *:nth-child(5) {
+  grid-column: 4;
+}
+
+/* Player bar ringkas di atas navigasi bawah */
+
+.mobile .playerbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(56px + env(safe-area-inset-bottom));
+  z-index: 46;
+  height: 66px;
+  flex: none;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--surface-container);
+  border-top: 1px solid var(--outline-variant);
+}
+
+.mobile .player-right {
+  display: flex;
+  align-items: center;
+  margin-left: 2px;
+}
+
+.mobile .player-right > .player-extra,
+.mobile .player-right > .timer-wrap,
+.mobile .player-right > .volume-control,
+.mobile .player-center .seek-row,
+.mobile .player-left > .icon-btn,
+.mobile .player-mode-btn {
+  display: none !important;
+}
+
+.mobile .player-center {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.mobile .player-controls {
+  gap: 2px;
+}
+
+.mobile .player-controls .icon-btn {
+  width: 38px;
+  height: 38px;
+}
+
+.mobile .play-main {
+  width: 44px;
+  height: 44px;
+}
+
+.mobile .now-playing-button {
+  max-width: none;
+  gap: 9px;
+  padding: 2px;
+}
+
+.mobile .now-playing-button .cover {
+  width: 46px !important;
+  height: 46px !important;
+}
+
+.mobile .player-song-text strong {
+  font-size: 0.88rem;
+}
+
+.mobile .player-song-text small {
+  font-size: 0.74rem;
+}
+
+/* Navigasi bawah */
+
+.mobile-nav {
+  display: none;
+}
+
+.mobile .mobile-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 47;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  min-height: 56px;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface-container-high, var(--surface-container));
+  border-top: 1px solid var(--outline-variant);
+}
+
+.mobile-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: none;
+  background: transparent;
+  color: var(--on-surface-variant);
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 6px 2px;
+  border-radius: 12px;
+}
+
+.mobile-nav-item.active {
+  color: var(--primary);
+}
+
+.mobile-nav-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+/* Antrean dan dialog memakai lebar penuh di ponsel */
+
+.mobile .queue-scrim {
+  bottom: 0;
+  z-index: 58;
+}
+
+.mobile .queue-panel {
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  border-left: none;
+  z-index: 59;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile .queue-head {
+  padding-top: max(18px, env(safe-area-inset-top));
+}
+
+.mobile .modal-backdrop {
+  align-items: flex-end;
+  padding: 0;
+}
+
+.mobile .modal {
+  width: 100%;
+  max-width: none;
+  max-height: 88vh;
+  border-radius: 22px 22px 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile .toast-stack {
+  left: 12px;
+  right: 12px;
+  bottom: calc(130px + env(safe-area-inset-bottom));
+}
+
+.mobile .toast {
+  max-width: none;
+  width: 100%;
+}
+
+/* Tampilan sekarang diputar */
+
+.mobile .np-overlay {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile .np-head {
+  padding-inline: 14px;
+}
+
+.mobile .np-content {
+  padding-inline: 16px;
+}
+
+.mobile .np-close {
+  width: 42px;
+  height: 42px;
+}
+
+.mobile .np-cover-wrap {
+  width: min(100%, 260px) !important;
+}
+
+.mobile .np-play {
+  width: 58px;
+  height: 58px;
+}
+
+.mobile .detail-hero-inner {
+  padding: 18px;
+  gap: 14px;
+}
+
+.mobile .detail-hero-inner .detail-cover {
+  width: 104px !important;
+  height: 104px !important;
+}
+
+.mobile .stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mobile .settings-card {
+  padding: 16px;
+}
+
+.mobile .shortcuts {
+  grid-template-columns: 1fr;
+}
+
+.mobile .about-grid {
+  grid-template-columns: 1fr;
+}

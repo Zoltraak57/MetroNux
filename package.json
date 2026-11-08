@@ -14,7 +14,10 @@
     "start": "electron .",
     "app": "npm run build && electron .",
     "dist": "npm run build && electron-builder --linux AppImage",
-    "test:backend": "node scripts/test-backend.js"
+    "test:backend": "node scripts/test-backend.js",
+    "android:setup": "node scripts/setup-android.js",
+    "android:assets": "node scripts/build-mobile.js",
+    "android:apk": "npm run android:setup && npm run android:assets && node scripts/build-android.js"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",

@@ -22,6 +22,10 @@ file lokal yang perlu diurus.
 | --- | --- |
 | ![Hasil pencarian lagu di Metronux](docs/screenshots/search-dark.png) | ![Beranda Metronux dengan tema terang](docs/screenshots/home-light.png) |
 
+| Android, beranda | Android, pengaturan |
+| --- | --- |
+| ![Beranda Metronux di Android](docs/screenshots/android-home-dark.png) | ![Pengaturan Metronux di Android](docs/screenshots/android-settings-dark.png) |
+
 ## Fitur
 
 - **Streaming langsung.** Lagu dan video diputar dari YouTube Music melalui proxy lokal
@@ -60,6 +64,7 @@ file lokal yang perlu diurus.
 | Palet Material You | material-color-utilities |
 | Lirik | LRCLIB |
 | Paket Linux | electron-builder (AppImage) |
+| Android | WebView, nodejs-mobile, Gradle |
 
 ## Persyaratan
 
@@ -100,6 +105,55 @@ npm run dist
 
 Hasil build ada di `release/`. File AppImage dapat dijalankan langsung tanpa instalasi.
 Jika distro kamu tidak menyediakan FUSE 2, jalankan dengan `APPIMAGE_EXTRACT_AND_RUN=1`.
+
+## Android (APK)
+
+Versi Android memakai runtime Node.js tertanam dan WebView untuk menjalankan
+antarmuka React yang sama. Satu APK universal mendukung perangkat 32 bit
+(`armeabi-v7a`) dan 64 bit (`arm64-v8a`).
+
+Fitur yang tersedia sama dengan versi desktop: pencarian, beranda, playlist,
+lagu disukai, antrean, lirik, equalizer, dan tema Material You.
+
+### Memasang
+
+1. Unduh `Metronux-1.0.0-universal.apk` dari halaman Releases.
+   Jika kamu membangun sendiri, hasilnya ada di `release/android/`.
+2. Izinkan pemasangan dari sumber tidak dikenal jika sistem meminta.
+3. Buka Metronux dan pastikan perangkat terhubung ke internet.
+
+### Build APK
+
+Prasyarat:
+
+- JDK 17.
+- Android SDK dengan `platforms;android-35`, `build-tools;35.0.0`, dan
+  `ndk;26.1.10909125`.
+- Gradle 8.11 (tersedia lewat `android/gradlew`).
+
+```bash
+export ANDROID_HOME=/path/ke/android-sdk
+export JAVA_HOME=/path/ke/jdk-17
+npm run android:apk
+```
+
+Perintah itu mengunduh library nodejs-mobile, membangun UI mobile, menyalin
+aset, lalu menghasilkan `release/android/Metronux-1.0.0-universal.apk`.
+Jika `android/keystore.properties` belum ada, skrip membuat keystore rilis
+baru secara otomatis. Simpan keystore itu; APK dengan kunci berbeda tidak
+dapat memperbarui instalasi sebelumnya. Jangan membagikan berkas keystore
+dan `android/keystore.properties` ke publik.
+
+### Catatan Android
+
+- Data aplikasi disimpan di penyimpanan internal aplikasi, bukan di
+  `~/.config/Metronux`.
+- Tombol media, headset, dan Bluetooth ditangani lewat MediaSession Android.
+- Pemutaran di latar belakang mengikuti kebijakan penghemat baterai perangkat.
+  Beberapa vendor mematikan aplikasi saat layar mati; izinkan Metronux berjalan
+  di latar belakang jika pemutaran terhenti.
+- APK memakai cleartext hanya untuk `127.0.0.1`, tempat backend lokal berjalan.
+  Koneksi ke YouTube Music dan LRCLIB tetap memakai HTTPS.
 
 ## Data aplikasi
 
@@ -158,7 +212,14 @@ src/
 └── styles.css      # Material You dan override Glassmorphism
 scripts/
 ├── dev.js          # Vite dan Electron untuk pengembangan
-└── test-backend.js # uji store, parser lirik, dan proxy stream
+├── test-backend.js # uji store, parser lirik, dan proxy stream
+├── build-mobile.js # build UI dan aset Android
+├── setup-android.js # unduh library nodejs-mobile
+└── build-android.js # jalankan Gradle dan salin APK
+mobile/
+├── shim.js         # jembatan API untuk WebView Android
+└── backend/        # server HTTP lokal di Android
+android/            # proyek Gradle, JNI, dan konfigurasi APK
 ```
 
 ## Pengujian

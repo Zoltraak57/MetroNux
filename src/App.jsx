@@ -9,6 +9,7 @@ import { UIProvider } from './context/UIContext';
 import { Sidebar } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
 import { PlayerBar } from './components/PlayerBar';
+import { MobileNav } from './components/MobileNav';
 import { QueuePanel } from './components/QueuePanel';
 import { NowPlaying } from './components/NowPlaying';
 import { AddToPlaylistDialog, PlaylistFormDialog } from './components/PlaylistDialogs';
@@ -253,6 +254,7 @@ function Shell() {
         </div>
       </div>
       <PlayerBar />
+      <MobileNav />
       <QueuePanel />
       <NowPlaying />
       <PlaylistFormDialog />
