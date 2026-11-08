@@ -92,7 +92,8 @@ function main() {
   }
 
   fs.mkdirSync(OUT, { recursive: true });
-  const target = path.join(OUT, 'Metronux-1.0.0-universal.apk');
+  const version = require(path.join(ROOT, 'package.json')).version;
+  const target = path.join(OUT, `Metronux-${version}-universal.apk`);
   fs.copyFileSync(apk, target);
   const size = (fs.statSync(target).size / 1024 / 1024).toFixed(1);
   console.log(`[android] APK siap: ${target} (${size} MB)`);

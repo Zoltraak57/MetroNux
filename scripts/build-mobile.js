@@ -51,6 +51,43 @@ function injectShim(file) {
   fs.writeFileSync(file, next, 'utf8');
 }
 
+// nodejs-mobile dibangun tanpa ICU (v8_enable_i18n_support=0), sehingga properti
+// regex seperti \p{Emoji} ditolak V8 saat pencarian. Ganti dengan pemeriksaan
+// rentang kode poin biasa agar tetap jalan di perangkat.
+const EMOJI_HELPER = `function isEmojiOnly(text) {
+    for (const char of text) {
+        const cp = char.codePointAt(0);
+        if (cp === 0x200d || cp === 0xfe0f || cp === 0x20e3) continue;
+        if ((cp >= 0x1f000 && cp <= 0x1faff) || (cp >= 0x2600 && cp <= 0x27bf) ||
+            (cp >= 0x2b00 && cp <= 0x2bff) || (cp >= 0x2190 && cp <= 0x21ff) ||
+            (cp >= 0x2300 && cp <= 0x23ff) || (cp >= 0x25a0 && cp <= 0x25ff) ||
+            (cp >= 0x2900 && cp <= 0x297f) || cp === 0x00a9 || cp === 0x00ae ||
+            cp === 0x203c || cp === 0x2049 || cp === 0x2122 || cp === 0x2139 ||
+            cp === 0x3030 || cp === 0x303d || cp === 0x3297 || cp === 0x3299) continue;
+        return false;
+    }
+    return text.length > 0;
+}
+`;
+
+function patchYoutubei(target) {
+  const file = path.join(target, 'dist', 'src', 'parser', 'classes', 'misc', 'Text.js');
+  if (!fs.existsSync(file)) throw new Error('Berkas Text.js youtubei.js tidak ditemukan');
+  const original = fs.readFileSync(file, 'utf8');
+  const pattern = '(/^(?:\\p{Emoji}|\\u200d)+$/u).test(text)';
+  if (!original.includes(pattern)) {
+    if (original.includes('function isEmojiOnly')) return;
+    throw new Error('Pola emoji youtubei.js berubah, patch dibatalkan');
+  }
+  const marker = "const TAG = 'Text';";
+  if (!original.includes(marker)) throw new Error('Penanda Text.js youtubei.js tidak ditemukan');
+  const patched = original
+    .replace(marker, `${EMOJI_HELPER}${marker}`)
+    .replace(pattern, 'isEmojiOnly(text)');
+  fs.writeFileSync(file, patched, 'utf8');
+  console.log('[mobile] patch emoji youtubei.js untuk V8 tanpa ICU');
+}
+
 function buildUi() {
   const vite = path.join(ROOT, 'node_modules', '.bin', process.platform === 'win32' ? 'vite.cmd' : 'vite');
   const result = spawnSync(vite, ['build', '--outDir', 'dist-mobile', '--emptyOutDir'], {
@@ -96,6 +133,7 @@ async function main() {
     if (name === 'youtubei.js') {
       // Bundle browser tidak dipakai runtime Node.
       fs.rmSync(path.join(target, 'bundle'), { recursive: true, force: true });
+      patchYoutubei(target);
     }
     pruneRuntime(target);
   }

@@ -1,7 +1,7 @@
 {
   "name": "metronux",
   "productName": "Metronux",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Metronux: pemutar musik streaming untuk Linux dengan tema Material You dan Glassmorphism",
   "main": "electron/main.js",
   "desktopName": "metronux.desktop",

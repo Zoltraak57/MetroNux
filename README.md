@@ -117,7 +117,7 @@ lagu disukai, antrean, lirik, equalizer, dan tema Material You.
 
 ### Memasang
 
-1. Unduh `Metronux-1.0.0-universal.apk` dari halaman Releases.
+1. Unduh `Metronux-1.0.1-universal.apk` dari halaman Releases.
    Jika kamu membangun sendiri, hasilnya ada di `release/android/`.
 2. Izinkan pemasangan dari sumber tidak dikenal jika sistem meminta.
 3. Buka Metronux dan pastikan perangkat terhubung ke internet.
@@ -138,7 +138,7 @@ npm run android:apk
 ```
 
 Perintah itu mengunduh library nodejs-mobile, membangun UI mobile, menyalin
-aset, lalu menghasilkan `release/android/Metronux-1.0.0-universal.apk`.
+aset, lalu menghasilkan `release/android/Metronux-1.0.1-universal.apk`.
 Jika `android/keystore.properties` belum ada, skrip membuat keystore rilis
 baru secara otomatis. Simpan keystore itu; APK dengan kunci berbeda tidak
 dapat memperbarui instalasi sebelumnya. Jangan membagikan berkas keystore
